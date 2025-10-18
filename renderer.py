@@ -5,6 +5,7 @@ import glob
 import numpy as np
 from tqdm import tqdm
 from stt_engine import create_subtitles
+import subprocess
 
 # ArgumentParser 대신 간단한 설정 변수를 사용합니다.
 class Args:
@@ -41,7 +42,12 @@ def is_overlap(bbox1, bbox2):
     return True
 
 
-def render_subtitles(tracks, scores, args, subtitles_data):
+def render_subtitles(tracks, scores, args, subtitles_data,
+                     font_size,
+                     font_color,
+                     bubble_color,
+                     bubble_alpha,
+                     padding):
     flist = glob.glob(os.path.join(args.pyframesPath, '*.jpg'))
     flist.sort()
 
@@ -68,6 +74,10 @@ def render_subtitles(tracks, scores, args, subtitles_data):
     direction_hold_duration = 0  # 현재 방향이 유지된 프레임 수
     STABILITY_THRESHOLD = 12   # 0.5초 (25fps 기준 12프레임)
 
+    SAFE_MARGIN = 50  # 화면 끝에서 최소 20px 여유
+    safe_left, safe_top = SAFE_MARGIN, SAFE_MARGIN
+    safe_right, safe_bottom = fw - SAFE_MARGIN, fh - SAFE_MARGIN
+
     for fidx, fname in tqdm(enumerate(flist), total=len(flist)):
         image = cv2.imread(fname)
         current_faces = faces[fidx]
@@ -88,35 +98,34 @@ def render_subtitles(tracks, scores, args, subtitles_data):
                 for face in current_faces if face['track'] != best_speaker['track']
             ]
 
-            (text_w, text_h), _ = cv2.getTextSize(subtitle_text, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)
-            padding = 20
+            (text_w, text_h), _ = cv2.getTextSize(subtitle_text, cv2.FONT_HERSHEY_SIMPLEX, font_size, 2)
             bubble_width = text_w + padding * 2
             bubble_height = text_h + padding * 2
 
             x_center, y_center, s = speaker_bbox
 
-            top_dist = y_center - s
+            top_dist = (y_center - s) - safe_top
             top_space = top_dist - bubble_height
             for obbox in other_bboxes:
                 if is_overlap([x_center, y_center - s - bubble_height/2, bubble_width/2], obbox):
                     top_space = -1
                     break
 
-            bottom_dist = fh - (y_center + s)
+            bottom_dist = safe_bottom - (y_center + s)
             bottom_space = bottom_dist - bubble_height
             for obbox in other_bboxes:
                 if is_overlap([x_center, y_center + s + bubble_height/2, bubble_width/2], obbox):
                     bottom_space = -1
                     break
 
-            left_dist = x_center - s
+            left_dist = (x_center - s) - safe_left
             left_space = left_dist - bubble_width
             for obbox in other_bboxes:
                 if is_overlap([x_center - s - bubble_width/2, y_center, bubble_width/2], obbox):
                     left_space = -1
                     break
 
-            right_dist = fw - (x_center + s)
+            right_dist = safe_right - (x_center + s)
             right_space = right_dist - bubble_width
             for obbox in other_bboxes:
                 if is_overlap([x_center + s + bubble_width/2, y_center, bubble_width/2], obbox):
@@ -186,10 +195,11 @@ def render_subtitles(tracks, scores, args, subtitles_data):
                 line_end = (int(bubble_x - bubble_width // 2), int(bubble_y))
 
             # 말풍선 좌표 계산
+            bubble_x = max(SAFE_MARGIN + bubble_width // 2, min(fw - SAFE_MARGIN - bubble_width // 2, bubble_x))
+            bubble_y = max(SAFE_MARGIN + bubble_height // 2, min(fh - SAFE_MARGIN - bubble_height // 2, bubble_y))
             bubble_top_left = (int(bubble_x - bubble_width / 2), int(bubble_y - bubble_height / 2))
             bubble_bottom_right = (int(bubble_x + bubble_width / 2), int(bubble_y + bubble_height / 2))
             text_pos = (bubble_top_left[0] + padding, bubble_top_left[1] + padding + text_h)
-
 
             # 6. 렌더링
             # 연결선 그리기
@@ -197,11 +207,11 @@ def render_subtitles(tracks, scores, args, subtitles_data):
 
             # 반투명 사각형 그리기
             overlay = image.copy()
-            cv2.rectangle(overlay, bubble_top_left, bubble_bottom_right, (0, 0, 0), -1)
-            cv2.addWeighted(overlay, 0.7, image, 0.3, 0, image)
+            cv2.rectangle(overlay, bubble_top_left, bubble_bottom_right, bubble_color, -1)
+            cv2.addWeighted(overlay, bubble_alpha, image, 1-bubble_alpha, 0, image)
 
             # 텍스트 그리기
-            cv2.putText(image, subtitle_text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            cv2.putText(image, subtitle_text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, 2)
 
         # 바운딩 박스 그리기 (주석 처리 또는 삭제)
         # for face in current_faces:
@@ -217,7 +227,21 @@ def render_subtitles(tracks, scores, args, subtitles_data):
             args.nDataLoaderThread, os.path.join(args.pyaviPath, 'final_output.avi')))
     os.system(command)
 
-def main():
+    subprocess.run([
+        'ffmpeg',
+        '-y',
+        '-i', os.path.join(args.pyaviPath, 'final_output.avi'),
+        '-c:v', 'libx264',
+        '-c:a', 'aac',
+        '-strict', 'experimental',
+        os.path.join(args.pyaviPath, 'final_output.mp4')
+    ])
+
+def execute_renderer(font_size,
+                     font_color,
+                     bubble_color,
+                     bubble_alpha,
+                     padding):
     tracks_path = os.path.join(args.pyworkPath, 'tracks.pckl')
     scores_path = os.path.join(args.pyworkPath, 'scores.pckl')
 
@@ -240,8 +264,35 @@ def main():
     print("STT 자막 데이터 생성 완료.")
     # ---------------------------
 
-    render_subtitles(tracks, scores, args, subtitles_data)
+    render_subtitles(tracks, scores, args, subtitles_data, font_size, font_color, bubble_color, bubble_alpha, padding)
     print("Rendering complete. Final video saved as 'final_output.avi'")
+
+def main():
+    print("renderer main")
+    # tracks_path = os.path.join(args.pyworkPath, 'tracks.pckl')
+    # scores_path = os.path.join(args.pyworkPath, 'scores.pckl')
+
+    # if not os.path.exists(tracks_path) or not os.path.exists(scores_path):
+    #     print(f"Error: {tracks_path} or {scores_path} not found. Please run the 1st step first.")
+    #     return
+
+    # with open(tracks_path, 'rb') as f:
+    #     tracks = pickle.load(f)
+
+    # with open(scores_path, 'rb') as f:
+    #     scores = pickle.load(f)
+
+    # print("Successfully loaded tracks and scores. Starting rendering...")
+
+    # # --- 이 부분이 수정됩니다. ---
+    # print("STT 자막 데이터 생성 시작...")
+    # # stt_engine.py의 함수를 호출하여 자막 데이터를 생성합니다.
+    # subtitles_data = create_subtitles(args, len(tracks))
+    # print("STT 자막 데이터 생성 완료.")
+    # # ---------------------------
+
+    # render_subtitles(tracks, scores, args, subtitles_data)
+    # print("Rendering complete. Final video saved as 'final_output.avi'")
 
 if __name__ == '__main__':
     main()
