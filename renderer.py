@@ -45,6 +45,7 @@ def is_overlap(bbox1, bbox2):
 def render_subtitles(tracks, scores, args, subtitles_data,
                      font_size,
                      font_color,
+                     thickness,
                      bubble_color,
                      bubble_alpha,
                      padding):
@@ -53,7 +54,7 @@ def render_subtitles(tracks, scores, args, subtitles_data,
 
     faces = [[] for _ in range(len(flist))]
     for tidx, track in enumerate(tracks):
-        print(f"Track ID: {tidx}, First frame: {track['track']['frame'].tolist()[0]}")
+        # print(f"Track ID: {tidx}, First frame: {track['track']['frame'].tolist()[0]}")
         score = scores[tidx]
         for fidx, frame in enumerate(track['track']['frame'].tolist()):
             s_smoothed = np.mean(score[max(fidx - 2, 0): min(fidx + 3, len(score) - 1)])
@@ -98,7 +99,7 @@ def render_subtitles(tracks, scores, args, subtitles_data,
                 for face in current_faces if face['track'] != best_speaker['track']
             ]
 
-            (text_w, text_h), _ = cv2.getTextSize(subtitle_text, cv2.FONT_HERSHEY_PlAIN, font_size, 2)
+            (text_w, text_h), _ = cv2.getTextSize(subtitle_text, cv2.FONT_HERSHEY_SIMPLEX, font_size, thickness)
             bubble_width = text_w + padding * 2
             bubble_height = text_h + padding * 2
 
@@ -211,7 +212,7 @@ def render_subtitles(tracks, scores, args, subtitles_data,
             cv2.addWeighted(overlay, bubble_alpha, image, 1-bubble_alpha, 0, image)
 
             # 텍스트 그리기
-            cv2.putText(image, subtitle_text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, 2)
+            cv2.putText(image, subtitle_text, text_pos, cv2.FONT_HERSHEY_SIMPLEX, font_size, font_color, thickness)
 
         # 바운딩 박스 그리기 (주석 처리 또는 삭제)
         # for face in current_faces:
@@ -239,6 +240,7 @@ def render_subtitles(tracks, scores, args, subtitles_data,
 
 def execute_renderer(font_size,
                      font_color,
+                     thickness,
                      bubble_color,
                      bubble_alpha,
                      padding):
@@ -257,14 +259,13 @@ def execute_renderer(font_size,
 
     print("Successfully loaded tracks and scores. Starting rendering...")
 
-    # --- 이 부분이 수정됩니다. ---
-    print("STT 자막 데이터 생성 시작...")
-    # stt_engine.py의 함수를 호출하여 자막 데이터를 생성합니다.
+    print("STT engine - creating subtitles data START...")
     subtitles_data = create_subtitles(args, len(tracks))
-    print("STT 자막 데이터 생성 완료.")
+    print("STT engine - creating subtitles data COMPLETED !")
     # ---------------------------
 
-    render_subtitles(tracks, scores, args, subtitles_data, font_size, font_color, bubble_color, bubble_alpha, padding)
+    render_subtitles(tracks, scores, args, subtitles_data, font_size, font_color, thickness, bubble_color, bubble_alpha, padding)
+    print("===========================================================")
     print("Rendering complete. Final video saved as 'final_output.avi'")
 
 def main():

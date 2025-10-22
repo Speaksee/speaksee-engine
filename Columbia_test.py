@@ -41,9 +41,10 @@ parser.add_argument('--colSavePath',           type=str, default="/colDataPath",
 
 parser.add_argument('--fontSize', type=float, default=1.0)
 parser.add_argument('--fontColor', type=int, nargs=3, default=[255, 255, 255])  # B G R
+parser.add_argument('--thickness', type=int, default=2)
 parser.add_argument('--bubbleColor', type=int, nargs=3, default=[0, 0, 0])  # B G R
 parser.add_argument('--bubbleAlpha', type=float, default=0.7)
-parser.add_argument('--padding', type=int, default=20)
+parser.add_argument('--padding', type=int, default=10)
 
 args = parser.parse_args()
 
@@ -529,6 +530,7 @@ def main():
     # stt_engine.main()
     renderer.execute_renderer(args.fontSize, 
                               args.fontColor,
+                              args.thickness,
                               args.bubbleColor,
                               args.bubbleAlpha,
                               args.padding)

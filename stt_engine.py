@@ -97,12 +97,12 @@ def main():
     # TODO: 테스트할 트랙 개수에 맞게 수정하세요.
     num_tracks_for_test = 28
 
-    print("STT 자막 데이터 생성 시작...")
+    print("STT engine - creating subtitles data START...")
 
     # create_subtitles 함수를 호출합니다.
     subtitles = create_subtitles(args, num_tracks_for_test)
 
-    print("STT 자막 데이터 생성 완료. 결과 출력:")
+    print("STT engine - creating subtitles data COMPLETED !")
 
     # 1. 전체 데이터의 쉐입(구조) 출력
     num_frames_with_subtitles = len(subtitles)
@@ -120,13 +120,6 @@ def main():
 
     # subtitles 딕셔너리의 키(프레임 번호)를 정렬합니다.
     sorted_frames = sorted(subtitles.keys())
-
-    # for frame_num in sorted_frames:
-    #     # 해당 프레임에 0번 트랙의 자막이 있는 경우에만 출력
-    #     if 0 in subtitles[frame_num]:
-    #         print(f"프레임 {frame_num}: {subtitles[frame_num][0]}")
-
-    # print("\n--- 출력 완료. ---")
 
 if __name__ == "__main__":
     main()
