@@ -29,6 +29,9 @@ def create_subtitles(args, num_tracks):
         start_time_sec = segment['start']
         end_time_sec = segment['end']
 
+        # print("<<<< result >>>>")
+        # print(f"{segment['words']}")
+
         # segment의 길이가 기준보다 길 경우에만 문장 부호로 분할
         if (end_time_sec - start_time_sec) > LONG_SEGMENT_THRESHOLD:
             words = segment['words']
@@ -42,7 +45,7 @@ def create_subtitles(args, num_tracks):
             for word in words:
                 current_sub_segment_words.append(word)
                 # 텍스트에 문장 부호가 포함되어 있는지 확인
-                if re.search(r'[.?!,]', word['text']):
+                if re.search(r'[.?!,]', word['word']):
                     sub_segments.append(current_sub_segment_words)
                     current_sub_segment_words = []
 
@@ -57,7 +60,7 @@ def create_subtitles(args, num_tracks):
 
                 start_frame = int(sub_segment_words[0]['start'] * fps)
                 end_frame = int(sub_segment_words[-1]['end'] * fps)
-                text = ' '.join([word['text'] for word in sub_segment_words]).strip()
+                text = ' '.join([word['word'] for word in sub_segment_words]).strip()
 
                 # 자막 데이터 할당
                 for f in range(start_frame, end_frame):
@@ -118,12 +121,12 @@ def main():
     # subtitles 딕셔너리의 키(프레임 번호)를 정렬합니다.
     sorted_frames = sorted(subtitles.keys())
 
-    for frame_num in sorted_frames:
-        # 해당 프레임에 0번 트랙의 자막이 있는 경우에만 출력
-        if 0 in subtitles[frame_num]:
-            print(f"프레임 {frame_num}: {subtitles[frame_num][0]}")
+    # for frame_num in sorted_frames:
+    #     # 해당 프레임에 0번 트랙의 자막이 있는 경우에만 출력
+    #     if 0 in subtitles[frame_num]:
+    #         print(f"프레임 {frame_num}: {subtitles[frame_num][0]}")
 
-    print("\n--- 출력 완료. ---")
+    # print("\n--- 출력 완료. ---")
 
 if __name__ == "__main__":
     main()

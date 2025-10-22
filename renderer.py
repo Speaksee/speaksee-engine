@@ -98,7 +98,7 @@ def render_subtitles(tracks, scores, args, subtitles_data,
                 for face in current_faces if face['track'] != best_speaker['track']
             ]
 
-            (text_w, text_h), _ = cv2.getTextSize(subtitle_text, cv2.FONT_HERSHEY_SIMPLEX, font_size, 2)
+            (text_w, text_h), _ = cv2.getTextSize(subtitle_text, cv2.FONT_HERSHEY_PlAIN, font_size, 2)
             bubble_width = text_w + padding * 2
             bubble_height = text_h + padding * 2
 
