@@ -23,7 +23,7 @@ def create_subtitles(args, num_tracks):
     subtitles_data = {}
 
     # 긴 segment의 기준 시간 (초)
-    LONG_SEGMENT_THRESHOLD = 5.0
+    LONG_SEGMENT_THRESHOLD = 4.0
 
     for segment in result['segments']:
         start_time_sec = segment['start']

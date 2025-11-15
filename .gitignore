@@ -1,2 +1,6 @@
 # Ignore 
 demo/sample
+.DS_Store
+__pycache__/
+*.pyc
+*.mp4
