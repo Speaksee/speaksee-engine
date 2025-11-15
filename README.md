@@ -18,7 +18,7 @@
   * [Customization Options Arguments](#art-customization-options-arguments)
   * [Usage Example](#computer-usage-example)
 - [Contributors](#busts_in_silhouette-contributors)
-</br>
+</br >
 
 ## :star2: About the Project
 
@@ -44,8 +44,7 @@ Allows users to personalize subtitle appearance and layout to suit their prefere
 - Font Color — Choose text color (BGR format)
 - Bubble Color & Transparency — Customize speech bubble background and opacity
 - Padding — Set distance between text and bubble border
-</br>
-</br>
+</br >
 
 ## :gear: Argument & Usage
 ### :art: Customization Options Arguments
@@ -114,6 +113,7 @@ python speaksee.py --videoName "my_video" \
                  --bubbleAlpha 0.8 \
                  --padding 15
 ```
+<br />
 
 ## :busts_in_silhouette: Contributors
 
