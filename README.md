@@ -18,6 +18,7 @@
   * [Customization Options Arguments](#art-customization-options-arguments)
   * [Usage Example](#computer-usage-example)
 - [Contributors](#busts_in_silhouette-contributors)
+- [Academic Poster](#bookmark-tabs-academic-poster)
 </br >
 
 ## :star2: About the Project
@@ -120,3 +121,7 @@ python speaksee.py --videoName "my_video" \
 ### Team Members
 - 김하늘
 - 이주승
+<br />
+
+## :bookmark_tabs: Academic Poster
+<img width="100%" height="auto" alt="Image" src="https://github.com/user-attachments/assets/a77337d9-a7be-43a2-b737-b227fadff9af" />
