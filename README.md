@@ -3,7 +3,8 @@
   <h1>Speaksee</h1>
   <h4>AI-powered Speaker Following Subtitles</h4>
   <p>An AI system that detects the active speaker and renders dynamic, speech-bubble-style subtitles that follow each person on screen.</p>
-  <img src="https://github.com/user-attachments/assets/07bfe0c7-5897-41c4-ad7f-8e9070bfbea1" alt="demo" width="800" height="auto" />
+  <!-- <img src="https://github.com/user-attachments/assets/07bfe0c7-5897-41c4-ad7f-8e9070bfbea1" alt="demo" width="800" height="auto" /> -->
+  <img src="https://github.com/user-attachments/assets/8bf83291-0efc-4a8b-97b3-4b7f37d02e79" alt="demo" width="800" height="auto" />
 </div>
 
 <br />
